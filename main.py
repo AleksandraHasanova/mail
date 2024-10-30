@@ -9,7 +9,20 @@ def save():
         file.write(recipient_email_entry.get() + '\n')
         file.write(password_entry.get() + '\n')
 
+def load():
+    try:
+        with open('save.txt', 'r') as file:
+            info = file.readlines()
+            sender_email_entry.insert(0, info[0])
+            recipient_email_entry.insert(0, info[1])
+            password_entry.insert(0, info[2])
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        mb.showerror('Ошибка', f'Ошибка {e}')
+
 def send_email():
+    save()
     sender_email = sender_email_entry.get()
     recipient = recipient_email_entry.get()
     password = password_entry.get()
@@ -21,6 +34,7 @@ def send_email():
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient
+
     server = None
 
     try:
@@ -29,7 +43,7 @@ def send_email():
         server.send_message(msg)
         result_label.config(text='Письмо отправлено')
     except Exception as e:
-        mb.showerror('Ошибка',f'Ошибка {e}')
+        result_label.config(text=f'Ошибка {e}')
     finally:
         if server:
             server.quit()
@@ -62,5 +76,7 @@ Button(text='Отправить сообщение', command=send_email).grid(ro
 
 result_label = Label(text='')
 result_label.grid(row=6, column=1,sticky=W)
+
+load()
 
 window.mainloop()
